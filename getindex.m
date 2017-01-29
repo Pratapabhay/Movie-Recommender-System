@@ -1,8 +1,7 @@
 function idx = getindex(usermovie)
-%GETMOVIELIST reads the fixed movie list in movie.txt and returns a
-%cell array of the words
-%   movieList = GETMOVIELIST() reads the fixed movie list in movie.txt 
-%   and returns a cell array of the words in movieList.
+%getindex reads the fixed movie list in movie.txt and returns a
+%index to the movie provided in the parameter.
+
 
 
 %% Read the fixed movieulary list
@@ -20,7 +19,9 @@ for i = 1:n
     % Actual Word
     movieList{i} = strtrim(movieName);
 	if(strcmp(usermovie,movieList{i})==1)
+		%Setting return value to the index of the movie
 		idx = i;
+		break;
 	end
 
 end
