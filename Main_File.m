@@ -1,19 +1,4 @@
-%% Machine Learning Online Class
-%  Exercise 8 | Anomaly Detection and Collaborative Filtering
-%
-%  Instructions
-%  ------------
-%
-%  This file contains code that helps you get started on the
-%  exercise. You will need to complete the following functions:
-%
-%     estimateGaussian.m
-%     selectThreshold.m
-%     cofiCostFunc.m
-%
-%  For this exercise, you will not need to change any code in this file,
-%  or any other files other than those mentioned above.
-%
+%% Movie Recommender System using Collaborative Filtering
 
 %% =============== Part 1: Loading movie ratings dataset ================
 %  You will start by loading the movie ratings dataset to understand the
@@ -22,7 +7,7 @@
 fprintf('Loading movie ratings dataset.\n\n');
 
 %  Load data
-load ('ex8_movies.mat');
+load ('movies.mat');
 
 %  Y is a 1682x943 matrix, containing ratings (1-5) of 1682 movies on 
 %  943 users
@@ -30,26 +15,8 @@ load ('ex8_movies.mat');
 %  R is a 1682x943 matrix, where R(i,j) = 1 if and only if user j gave a
 %  rating to movie i
 
-%  From the matrix, we can compute statistics like average rating.
-fprintf('Average rating for movie 1 (Toy Story): %f / 5\n\n', ...
-        mean(Y(1, R(1, :))));
-
-%  We can "visualize" the ratings matrix by plotting it with imagesc
-imagesc(Y);
-ylabel('Movies');
-xlabel('Users');
-
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
-
-%% ============ Part 2: Collaborative Filtering Cost Function ===========
-%  You will now implement the cost function for collaborative filtering.
-%  To help you debug your cost function, we have included set of weights
-%  that we trained on that. Specifically, you should complete the code in 
-%  cofiCostFunc.m to return J.
-
 %  Load pre-trained weights (X, Theta, num_users, num_movies, num_features)
-load ('ex8_movieParams.mat');
+load ('movieParams.mat');
 
 %  Reduce the data set size so that this runs faster
 num_users = 4; num_movies = 5; num_features = 3;
@@ -62,25 +29,16 @@ R = R(1:num_movies, 1:num_users);
 J = cofiCostFunc([X(:) ; Theta(:)], Y, R, num_users, num_movies, ...
                num_features, 0);
            
-fprintf(['Cost at loaded parameters: %f '...
-         '\n(this value should be about 22.22)\n'], J);
-
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
+fprintf(['Cost at loaded parameters: %f '], J);
 
 
 %% ============== Part 3: Collaborative Filtering Gradient ==============
-%  Once your cost function matches up with ours, you should now implement 
-%  the collaborative filtering gradient function. Specifically, you should 
-%  complete the code in cofiCostFunc.m to return the grad argument.
-%  
+%  Once your cost function matches up with the data, you should now implement 
+%  the collaborative filtering gradient function.
 fprintf('\nChecking Gradients (without regularization) ... \n');
 
 %  Check gradients by running checkNNGradients
 checkCostFunction;
-
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
 
 
 %% ========= Part 4: Collaborative Filtering Cost Regularization ========
@@ -93,11 +51,8 @@ pause;
 J = cofiCostFunc([X(:) ; Theta(:)], Y, R, num_users, num_movies, ...
                num_features, 1.5);
            
-fprintf(['Cost at loaded parameters (lambda = 1.5): %f '...
-         '\n(this value should be about 31.34)\n'], J);
+fprintf(['Cost at loaded parameters (lambda = 1.5): %f '], J);
 
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
 
 
 %% ======= Part 5: Collaborative Filtering Gradient Regularization ======
@@ -111,32 +66,26 @@ fprintf('\nChecking Gradients (with regularization) ... \n');
 %  Check gradients by running checkNNGradients
 checkCostFunction(1.5);
 
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
-
 
 %% ============== Part 6: Entering ratings for a new user ===============
-%  Before we will train the collaborative filtering model, we will first
-%  add ratings that correspond to a new user that we just observed. This
-%  part of the code will also allow you to put in your own ratings for the
-%  movies in our dataset!
-%
+% Here We are adding rated by the user which are provided in UserRatings.txt
+% We will load these ratings into a vector my_ratings which would further be 
+% used for collaborative filtering
+
 movieList = loadMovieList();
 
 %  Initialize my ratings
 my_ratings = zeros(1682, 1);
 
-% Check the file movie_idx.txt for id of each movie in our dataset
-% For example, Toy Story (1995) has ID 1, so to rate it "4", you can set
-my_ratings(1) = 4;
 
-% Or suppose did not enjoy Silence of the Lambs (1991), you can set
-my_ratings(98) = 2;
+[userList n] = loadUserList();
 
-% We have selected a few movies we liked / did not like and the ratings we
-% gave are as follows:
-my_ratings(7) = 3;
-my_ratings(12)= 4;
+
+
+for i= 1:n
+	idx = getindex(userList{i,2});
+	my_ratings(idx)= str2num(userList{i,1});
+end
 
 fprintf('\n\nNew user ratings:\n');
 for i = 1:length(my_ratings)
@@ -146,8 +95,6 @@ for i = 1:length(my_ratings)
     end
 end
 
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
 
 
 %% ================== Part 7: Learning Movie Ratings ====================
@@ -158,13 +105,8 @@ pause;
 fprintf('\nTraining collaborative filtering...\n');
 
 %  Load data
-load('ex8_movies.mat');
+load('movies.mat');
 
-%  Y is a 1682x943 matrix, containing ratings (1-5) of 1682 movies by 
-%  943 users
-%
-%  R is a 1682x943 matrix, where R(i,j) = 1 if and only if user j gave a
-%  rating to movie i
 
 %  Add our own ratings to the data matrix
 Y = [my_ratings Y];
@@ -214,8 +156,8 @@ my_predictions = p(:,1) + Ymean;
 movieList = loadMovieList();
 
 [r, ix] = sort(my_predictions, 'descend');
-fprintf('\nTop recommendations for you:\n');
-for i=1:10
+fprintf('\nTop 20 Recommended Movies for you based on the ratings provided:\n');
+for i=1:20
     j = ix(i);
     fprintf('Predicting rating %.1f for movie %s\n', my_predictions(j), ...
             movieList{j});

@@ -15,29 +15,40 @@ Theta_grad = zeros(size(Theta));
 s=0;
 [a b] =  size(R);
 
-for i = 1:a
-	for j = 1:b
-		if(R(i,j)==1)
-			s = s + (Theta(j,:) * X(i,:)' - Y(i,j)) .^ 2; 
-		endif
-	end
-end
+s =  sum(sum(((X*Theta').* R - (Y .* R) ).^ 2)); 
 
-J = s/2;
+a = sum(sum(Theta .^ 2));
+b = sum(sum(X .^ 2));
+
+
+
+J =  0.5 * ( s + lambda * (a+b));
 
 [a b] = size(X);
 
 for i = 1:a
 	idx = find(R(i,:)==1);
 
-	Thetatemp = Theta(idx,i);
+	Thetatemp = Theta(idx,:);
+
 	Ytemp = Y(i, idx);
-	size(X(i,:))
-	size(Thetatemp)
-	%X_grad(i, :) = ((X(i, :) * Thetatemp') − Y_temp ) * Thetatemp;
+	
+	X_grad(i, :) = ((X(i, :) * Thetatemp') - Ytemp ) * Thetatemp;
 end
 
+X_grad = X_grad + lambda * X;
 
+[a b] = size(Theta);
+
+
+for i = 1:a
+	idx = find(R(:,i)==1);
+	Xtemp = X(idx,:);
+	Ytemp = Y(idx, i);
+	Theta_grad(i, :) = ((Xtemp * Theta(i,:)') - Ytemp )' * Xtemp;
+end
+
+Theta_grad = Theta_grad + lambda * Theta;
 grad = [X_grad(:); Theta_grad(:)];
 
 end
