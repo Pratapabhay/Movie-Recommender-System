@@ -20,7 +20,7 @@ a = sum(sum(Theta .^ 2));
 b = sum(sum(X .^ 2));
 
 
-
+%Returning the cost
 J =  0.5 * ( s + lambda * (a+b));
 
 [a b] = size(X);
@@ -47,6 +47,7 @@ for i = 1:a
 	Theta_grad(i, :) = ((Xtemp * Theta(i,:)') - Ytemp )' * Xtemp;
 end
 
+%Returning the gradient
 Theta_grad = Theta_grad + lambda * Theta;
 grad = [X_grad(:); Theta_grad(:)];
 
